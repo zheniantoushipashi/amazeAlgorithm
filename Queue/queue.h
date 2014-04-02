@@ -12,7 +12,8 @@ struct  Node
 template <class T>
 class  LinkQueue
 {
-  Node<T> * front, * rear,, *q, *p,*x; 
+
+      Node<T> * front, * rear, *q, *p,*x; 
 	
    public:
       LinkQueue();
