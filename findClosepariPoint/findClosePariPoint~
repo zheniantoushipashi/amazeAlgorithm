@@ -1,0 +1,75 @@
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <algorithm>
+
+using namespace std;
+#define  MAXX 1<<30
+
+struct point
+{
+    double x,y;
+};
+point p[100010];
+int t[1000010];
+double min(double a,double b)
+{
+    return a>b?b:a;
+}
+
+int cmp(const point &a,const point &b)         //对于点的x坐标排序;
+{
+    if(a.x==b.x) return a.y<b.y;
+    return a.x>b.x;
+}
+
+int cmpy(const int &a,const int &b)    //对点的y坐标排序;
+{
+    return p[a].y<p[b].y;
+}
+
+double dis(point a,point b)
+{
+    return sqrt((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y));
+}
+
+double findClosepari(int left,int right)                //分治，递归。两部分中间的情况要特殊处理;
+{
+    double x=MAXX;
+    if(left==right) return x;
+    if(left==right-1) return dis(p[left],p[right]);
+    int mid=(left+right)>>1;                      //求出中间点;
+    double dl=findClosepari(left,mid);
+    double dr=findClosepari(mid+1,right);
+    dl=min(dl,dr);
+
+    int i,j,k;                                 //下面把中间2dl宽度的部分的点单独处理;
+    k=0;
+    for(i=left;i<=right;i++)
+        if(fabs(p[i].x-p[i+1].x)<dl) t[k++]=i;
+
+    sort(t,t+k,cmpy);   //由下到上排序,扫描;
+    for(i=0; i<k; i++)
+        for(j=i+1; j<k&&p[t[j]].y-p[t[i]].y<dl; j++)
+        {
+            double d3 = dis(p[t[i]],p[t[j]]);
+            dl=min(dl,d3);
+        }
+    return dl;
+}
+
+
+int main()
+{
+    int n;
+    while(cin>>n,n)
+    {
+        for(int i=1;i<=n;i++)
+            scanf("%lf%lf",&p[i].x,&p[i].y);
+        sort(p+1,p+n-1,cmp);
+        double r=findClosepari(1,n)/2.0;
+        printf("%.2lf\n",r);
+    }
+    return 0;
+}

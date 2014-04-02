@@ -1,0 +1,107 @@
+#include "Point.h"
+#include <cmath>
+#include <algorithm>
+
+double Distance(const Point& s, const Point& t)
+{
+    double squarex = ( s.getx() - t.getx() ) * ( s.getx() - t.getx() );
+    double squarey = ( s.gety() - t.gety() ) * ( s.gety() - t.gety() );
+    return sqrt( squarex + squarey );
+}
+
+bool ComparePoint(const Point& p1, const Point& p2)
+{
+    return (p1.getx() < p2.getx());
+}
+
+double EnumShortestPair(const Point * p, int num)
+{//can only find one of the shortest path
+    double distance=Distance(p[0], p[1]);
+    int start = 0;
+    int end = 1;
+    for (int i=0; i<num; i++)
+    {
+        for (int j=i+1; j<num; j++)
+        {
+            if ( Distance(p[i], p[j]) < distance )
+            {
+                distance = Distance(p[i], p[j]);
+                start = i;
+                end = j;
+            }
+        }
+    }
+    return distance;
+}
+
+double FindShortPairDC(const Point * p, int num)
+{//use divide and conquer algorithm to find the shortest path
+    double dL, dR, d, midXVal;
+    if (num < 2)
+    {
+        std::cout << "Need to input more than 2 points!"<< std::endl;
+        exit(1);
+    }
+    if (num < 4)
+    {
+        return EnumShortestPair(p, num);
+    }
+
+    int mid = 0;
+    mid = (num+1)/2;
+    dL = FindShortPairDC(p, mid);
+    dR = FindShortPairDC(p+mid, (num-mid));
+    d = dL < dR ? dL : dR;
+
+    midXVal = p[mid].getx();
+
+    int stripStart = 0;
+    int stripEnd = num-1;
+    for (int i=0; i<num-1; i++)
+    {
+        if ( (p[i].getx() < midXVal-d) && (p[i+1].getx() >= midXVal-d) )
+            stripStart = i+1;
+        if ( (p[i].getx() <= midXVal+d) && (p[i+1].getx() > midXVal+d) )
+            stripEnd = i;
+    }    
+    int start = 0;
+    int end = 1;
+    for (int i=stripStart; i<stripEnd; i++)
+    {
+        for (int j=i+1; j<stripEnd; j++)
+        {
+            if ( Distance(p[i], p[j]) < d )
+            {
+                d = Distance(p[i], p[j]);
+                start = i;
+                end = j;
+            }
+        }
+    }
+    if (start!=0 || end!=0)
+        std::cout << "The shortest pair is: P" << start+1 << ", P" << end+1 <<""<<std::endl;
+
+    std::cout << "the distance is: " << d <<std::endl;
+    return d;
+}
+
+void PrintPoints(const Point * p, int num)
+{
+    for (int i=0; i<num; i++)
+    {
+        std::cout << p[i] << " ";
+    }
+    std::cout << std::endl;
+}
+
+int main(int argc, const char** argv)
+{
+    Point p[] = {Point(2,3), Point(4,3), Point(4,6), Point(5,7), Point(4,3)};
+    int size = sizeof(p)/sizeof(p[0]);
+    PrintPoints(p, size);
+    std::sort(p, p+size, ComparePoint);
+    PrintPoints(p, size);
+    FindShortPairDC(p, size);
+
+    return 0;
+}
